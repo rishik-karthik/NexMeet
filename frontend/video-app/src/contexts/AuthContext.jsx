@@ -3,7 +3,7 @@ import httpStatus from "http-status";
 import axios, { HttpStatusCode } from "axios"; //used to make http requests
 import { createContext, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import server from "../environment";
 //context = global storage/variable
 //every component inside provider can access this now
 //<AuthContext.provider value = {{user}}> <App/> </AuthContext.Provider>
@@ -12,7 +12,7 @@ const AuthContext = createContext({});
 
 //axios to call backend api
 const client = axios.create({
-  baseURL: "http://localhost:8000/api/v1/users",
+  baseURL: `${server}/api/v1/users`,
 });
 
 const AuthProvider = ({ children }) => {

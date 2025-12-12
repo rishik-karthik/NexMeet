@@ -12,8 +12,9 @@ import ChatIcon from "@mui/icons-material/Chat";
 import CallEndIcon from "@mui/icons-material/CallEnd";
 import CloseIcon from "@mui/icons-material/Close";
 import SendIcon from "@mui/icons-material/Send";
+import server from "../environment";
 
-const server_url = "http://localhost:8000";
+const server_url = server;
 
 export default function VideoMeetComponent() {
   const connectionsRef = useRef({});
