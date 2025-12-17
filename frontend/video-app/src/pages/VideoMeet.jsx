@@ -16,6 +16,32 @@ import server from "../environment";
 
 const server_url = server;
 
+// Component to handle remote video stream updates
+function RemoteVideoComponent({ video }) {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (videoRef.current && video.stream) {
+      if (videoRef.current.srcObject !== video.stream) {
+        videoRef.current.srcObject = video.stream;
+      }
+    }
+  }, [video.stream, video.socketId]);
+
+  return (
+    <div className="remote-video-wrapper">
+      <video
+        ref={videoRef}
+        data-socket={video.socketId}
+        autoPlay
+        playsInline
+        className="remote-video"
+      ></video>
+      <div className="video-label">{video.username || `User ${video.socketId.substring(0, 6)}`}</div>
+    </div>
+  );
+}
+
 export default function VideoMeetComponent() {
   const connectionsRef = useRef({});
   //stun server - lightweight servers running on public internet which returns the ip add of req's device
@@ -34,7 +60,7 @@ export default function VideoMeetComponent() {
   let [audio, setAudio] = useState();
   let [screen, setScreen] = useState();
   let [showModal, setShowModal] = useState(false);
-  let [screenAvailable, setscreenAvailble] = useState();
+  let [screenAvailable, setscreenAvailble] = useState(typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia ? true : false);
   let [messages, setMessages] = useState([]);
 
   let [message, setMessage] = useState("");
@@ -380,45 +406,39 @@ export default function VideoMeetComponent() {
               ? usernamesMap[socketListId] 
               : remoteUsername || `User ${socketListId.substring(0, 6)}`;
 
-            let videoExists = videoRef.current.find(
-              (video) => video.socketId === socketListId
-            );
+            // Use functional form of setState to check current state
+            setVideos((prevVideos) => {
+              // Check if video with this socketId already exists in current state
+              const existingIndex = prevVideos.findIndex(
+                (video) => video.socketId === socketListId
+              );
 
-            if (videoExists) {
-              console.log("FOUND EXISTING");
-
-              // Update the stream of the existing video
-              setVideos((videos) => {
-                const updatedVideos = videos.map((video) =>
-                  video.socketId === socketListId
-                    ? { ...video, stream: stream, username: currentUsername }
-                    : video
-                );
+              if (existingIndex >= 0) {
+                // Update the stream of the existing video
+                console.log("UPDATING EXISTING VIDEO STREAM");
+                const updatedVideos = [...prevVideos];
+                updatedVideos[existingIndex] = {
+                  ...updatedVideos[existingIndex],
+                  stream: stream,
+                  username: currentUsername
+                };
                 videoRef.current = updatedVideos;
                 return updatedVideos;
-              });
-            } else {
-              // Create a new video
-              console.log("CREATING NEW");
-              let newVideo = {
-                socketId: socketListId,
-                stream: stream,
-                username: currentUsername,
-                autoplay: true,
-                playsinline: true,
-              };
-
-              setVideos((videos) => {
-                // Check if video with this socketId already exists
-                const exists = videos.some(v => v.socketId === socketListId);
-                if (exists) {
-                  return videos;
-                }
-                const updatedVideos = [...videos, newVideo];
+              } else {
+                // Create a new video
+                console.log("CREATING NEW VIDEO");
+                let newVideo = {
+                  socketId: socketListId,
+                  stream: stream,
+                  username: currentUsername,
+                  autoplay: true,
+                  playsinline: true,
+                };
+                const updatedVideos = [...prevVideos, newVideo];
                 videoRef.current = updatedVideos;
                 return updatedVideos;
-              });
-            }
+              }
+            });
           };
 
           // Add the local video stream
@@ -637,22 +657,10 @@ export default function VideoMeetComponent() {
               <div className="video-label">{username || "You"}</div>
             </div>
             {videos.map((video) => (
-              <div key={video.socketId} className="remote-video-wrapper">
-                <video
-                  data-socket={video.socketId}
-                  ref={(ref) => {
-                    if (ref && video.stream) {
-                      if (ref.srcObject !== video.stream) {
-                        ref.srcObject = video.stream;
-                      }
-                    }
-                  }}
-                  autoPlay
-                  playsInline
-                  className="remote-video"
-                ></video>
-                <div className="video-label">{video.username || `User ${video.socketId.substring(0, 6)}`}</div>
-              </div>
+              <RemoteVideoComponent 
+                key={video.socketId} 
+                video={video}
+              />
             ))}
           </div>
           
