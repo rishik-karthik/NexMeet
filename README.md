@@ -112,6 +112,3 @@ npm start
 ## 🤝 Feedback
 
 Suggestions and improvements are always welcome. Feel free to open an issue or contribute!
-
----laceholders**
-* Optimize it for **resume / portfolio linking**
