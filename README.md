@@ -4,7 +4,7 @@ A real-time video conferencing web application built using the **MERN stack**, e
 
 ## 🔗 Live & Source
 
-* **Live Demo:** [https://nextmeet-jkhf.onrender.com](https://nextmeet-jkhf.onrender.com)
+* **Live Demo:** [https://nextmeet-jkhf.onrender.com](https://nexmeet-jkhf.onrender.com)
 * **GitHub Repository:** [https://github.com/rishik-karthik/NexMeet](https://github.com/rishik-karthik/NexMeet)
 
 ---
